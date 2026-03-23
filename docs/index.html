@@ -377,10 +377,31 @@
     All experiments run on <strong>4&times;NVIDIA A100 (80GB)</strong> GPUs via Accelerate.
   </p>
 
-  <!-- ─── 2. RESULTS ─── -->
-  <h2>2. Results</h2>
+  <!-- ─── 2. TRAINING ─── -->
+  <h2>2. Training Dynamics</h2>
+  <p>
+    The figure below illustrates the evolution of speech quality and linguistic metrics
+    during the Vi-SparkRL training phase. The bold lines denote smoothed trends
+    (moving average, window <em>w</em>=50) superimposed on raw step-wise values.
+  </p>
 
-  <h3>2.1 Training Paradigm Comparison</h3>
+  <div class="figure">
+    <img src="assets/plots/training_progress_2800_smoothed.png" alt="Training dynamics" />
+    <div class="figure-caption">
+      <strong>Fig. 1.</strong> Evolution of speech quality and linguistic metrics during the Vi-SparkRL training phase.
+      The four panels illustrate training dynamics over time (steps).
+      Top left: Speaker Similarity (SIM, ↑); Top right: Audio Quality (UTMOS, ↑);
+      Bottom left: Word Error Rate (WER, ↓); Bottom right: Vietnamese Tone Accuracy (↑).
+      Bold lines denote smoothed trends (moving average, <em>w</em>=50) superimposed on raw step-wise values (light shaded).
+      The plots indicate a rapid reduction in WER and a significant improvement in Tone Accuracy during early training,
+      while SIM and UTMOS are well-maintained.
+    </div>
+  </div>
+
+  <!-- ─── 3. RESULTS ─── -->
+  <h2>3. Results</h2>
+
+  <h3>3.1 Training Paradigm Comparison</h3>
   <p>
     We compare three training paradigms on the PhoAudiobook test set (2,000 samples).
   </p>
@@ -428,7 +449,7 @@
     </div>
   </div>
 
-  <h3>2.2 Comparison with State-of-the-Art</h3>
+  <h3>3.2 Comparison with State-of-the-Art</h3>
   <p>
     We further compare Vi-SparkRL against state-of-the-art TTS systems.
     Metrics: WER (Whisper Large V3), MOS (UTMOS22-Strong), SIM (WavLM+ECAPA-TDNN),
@@ -494,27 +515,6 @@
     WER: Word Error Rate (%), MOS: Mean Opinion Score (UTMOS22), SIM: Speaker Similarity, RTF: Real-time Factor.
     Bold = best in column. Highlighted row is our proposed method.
   </p>
-
-  <!-- ─── 3. TRAINING ─── -->
-  <h2>3. Training Dynamics</h2>
-  <p>
-    The figure below illustrates the evolution of speech quality and linguistic metrics
-    during the Vi-SparkRL training phase. The bold lines denote smoothed trends
-    (moving average, window <em>w</em>=50) superimposed on raw step-wise values.
-  </p>
-
-  <div class="figure">
-    <img src="assets/plots/training_progress_2800_smoothed.png" alt="Training dynamics" />
-    <div class="figure-caption">
-      <strong>Fig. 1.</strong> Evolution of speech quality and linguistic metrics during the Vi-SparkRL training phase.
-      The four panels illustrate training dynamics over time (steps).
-      Top left: Speaker Similarity (SIM, ↑); Top right: Audio Quality (UTMOS, ↑);
-      Bottom left: Word Error Rate (WER, ↓); Bottom right: Vietnamese Tone Accuracy (↑).
-      Bold lines denote smoothed trends (moving average, <em>w</em>=50) superimposed on raw step-wise values (light shaded).
-      The plots indicate a rapid reduction in WER and a significant improvement in Tone Accuracy during early training,
-      while SIM and UTMOS are well-maintained.
-    </div>
-  </div>
 
   <!-- ─── 4. AUDIO SAMPLES ─── -->
   <h2>4. Audio Samples</h2>
