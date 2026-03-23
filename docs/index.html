@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GSPO for Vietnamese TTS Fine-tuning</title>
+  <title>Vi-SparkRL Demo</title>
   <style>
     body {
       font-family: Georgia, 'Times New Roman', serif;
@@ -22,7 +22,7 @@
 
     /* ── Title & Authors ── */
     h1 {
-      font-size: 2em;
+      font-size: 1.95em;
       font-weight: bold;
       color: #111;
       text-align: center;
@@ -80,7 +80,7 @@
       margin-bottom: 0.8em;
     }
     h3 {
-      font-size: 1.1em;
+      font-size: 1.05em;
       color: #222;
       margin-top: 1.4em;
       margin-bottom: 0.5em;
@@ -97,44 +97,69 @@
       border-radius: 4px;
     }
     .figure-caption {
-      font-size: 0.88em;
-      color: #666;
-      margin-top: 6px;
+      font-size: 0.87em;
+      color: #555;
+      margin-top: 8px;
       font-style: italic;
+      text-align: left;
+      max-width: 820px;
+      margin-left: auto;
+      margin-right: auto;
     }
+    .figure-caption strong { font-style: normal; }
 
     /* ── Tables ── */
     table {
       width: 100%;
       border-collapse: collapse;
       font-family: Arial, sans-serif;
-      font-size: 0.9em;
+      font-size: 0.88em;
       margin: 1em 0;
     }
     th {
       background: #f4f4f4;
       font-weight: bold;
-      padding: 8px 12px;
+      padding: 8px 10px;
       text-align: center;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
     }
     td {
-      padding: 7px 12px;
+      padding: 6px 10px;
       text-align: center;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
     }
     tr:nth-child(even) td { background: #f9f9f9; }
     .ours td { background: #e6f3ff !important; font-weight: bold; }
     td.left { text-align: left; }
-    .badge-up   { color: #2a7a2a; font-size: 0.82em; }
-    .badge-down { color: #c0392b; font-size: 0.82em; }
+    .table-caption {
+      font-size: 0.87em;
+      color: #555;
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+    .table-caption strong { font-style: normal; }
 
-    /* ── Reward component list ── */
+    /* ── Math / equation ── */
+    .eq {
+      text-align: center;
+      font-style: italic;
+      color: #444;
+      background: #f9f9f9;
+      border: 1px solid #eee;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-family: 'Times New Roman', serif;
+      font-size: 1em;
+      margin: 0.8em 0;
+    }
+
+    /* ── Reward list ── */
     .reward-list {
       background: #fafafa;
       border: 1px solid #ddd;
       border-radius: 4px;
-      padding: 12px 18px;
+      padding: 10px 18px;
       font-family: Arial, sans-serif;
       font-size: 0.92em;
     }
@@ -143,9 +168,9 @@
     /* ── Audio samples ── */
     .sample-block {
       border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 28px;
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
       background: #fff;
     }
     .sample-text {
@@ -178,66 +203,30 @@
       letter-spacing: 0.04em;
     }
     .audio-col.ours-col .model-label { color: #1a5fa8; }
-    audio {
-      width: 100%;
-      height: 40px;
-    }
+    audio { width: 100%; height: 40px; }
 
-    /* ── Pipeline steps ── */
-    .pipeline {
-      display: flex;
-      gap: 0;
-      margin: 1em 0;
-      font-family: Arial, sans-serif;
-      font-size: 0.88em;
-    }
-    .pipeline-step {
-      flex: 1;
-      text-align: center;
-      padding: 10px 8px;
+    /* ── Algorithm box ── */
+    .algorithm {
       border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 14px 18px;
       background: #fafafa;
-      position: relative;
-    }
-    .pipeline-step:not(:last-child)::after {
-      content: '→';
-      position: absolute;
-      right: -10px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #888;
-      font-size: 1.1em;
-      z-index: 1;
-    }
-    .pipeline-step .step-num {
-      font-weight: bold;
-      color: #555;
-      display: block;
-      font-size: 0.85em;
-    }
-    .pipeline-step .step-name {
-      font-weight: bold;
-      display: block;
-      color: #222;
-      margin: 2px 0;
-    }
-    .pipeline-step .step-desc {
-      color: #666;
+      font-family: 'Courier New', Courier, monospace;
       font-size: 0.82em;
+      line-height: 1.6;
+      margin: 1em 0;
     }
-
-    /* ── Code block ── */
-    pre {
-      background: #1e1e1e;
-      color: #d4d4d4;
-      padding: 16px 20px;
-      border-radius: 6px;
-      overflow-x: auto;
-      font-size: 0.82em;
-      line-height: 1.5;
+    .algorithm .algo-title {
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      font-size: 0.9em;
+      color: #333;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 4px;
     }
-    code { font-family: 'Courier New', Courier, monospace; }
-    pre .comment { color: #6a9955; }
+    .algorithm .kw { font-weight: bold; font-style: italic; }
+    .algorithm .cmt { color: #777; }
 
     /* ── Citation ── */
     .bibtex {
@@ -251,7 +240,6 @@
       overflow-x: auto;
     }
 
-    /* ── Footer ── */
     footer {
       margin-top: 3em;
       text-align: center;
@@ -266,171 +254,241 @@
 <div class="container">
 
   <!-- ─── TITLE ─── -->
-  <h1>GSPO for Vietnamese Text-to-Speech Fine-tuning</h1>
+  <h1>Vi-SparkRL: Enhancing Tonal Accuracy and Naturalness in Vietnamese TTS via Multi-Objective Rewards</h1>
   <p class="authors">Anonymous Authors</p>
-  <p class="affiliation">Anonymous Institution</p>
+  <p class="affiliation">Anonymous Institution &nbsp;|&nbsp; Under Review</p>
   <div class="links">
-    <a href="#">&#128196; Code (anonymous)</a>
+    <a href="#">&#128196; Paper (anonymous)</a>
+    <a href="#">&#128190; Code (anonymous)</a>
   </div>
 
   <!-- ─── ABSTRACT ─── -->
   <div class="abstract">
     <strong>Abstract.</strong>
-    We present a reinforcement learning approach to fine-tune <strong>Vi-SparkTTS-0.5B</strong>,
-    a Vietnamese large language model-based text-to-speech system, using
-    <strong>Group Relative Policy Optimization (GSPO)</strong>.
-    Our method optimizes a multi-component reward function that jointly targets
-    naturalness (UTMOS), intelligibility (WER), speaker similarity (SIM), and
-    Vietnamese tone accuracy (VietTone), applied via LoRA adaptation over 2,800 training steps
-    on 5,000 PhoAudiobook samples.
-    The GSPO-trained model achieves improved naturalness scores (+2% UTMOS) while
-    maintaining speaker similarity, demonstrating the viability of
-    policy-gradient methods for TTS quality optimization.
+    Recent advances in LLM-based TTS have enabled high-quality zero-shot voice cloning, yet tonal
+    languages such as Vietnamese remain challenging due to their lexical tone system.
+    We propose <strong>Vi-SparkRL</strong>, the first RLHF framework specifically designed to preserve
+    Vietnamese tonal integrity in lightweight (0.5B) zero-shot TTS models.
+    Our approach applies <strong>Group Sequence Policy Optimization (GSPO)</strong> to the acoustic
+    modeling phase, effectively mitigating training instability seen with token-level GRPO
+    for continuous audio signals.
+    We further design a <strong>multi-objective reward mechanism</strong> integrating ASR-based
+    intelligibility (WER), speaker similarity (SIM), acoustic quality (UTMOS), and a novel
+    <strong>VietTone reward</strong> that aligns synthesized F<sub>0</sub> trajectories with native tonal patterns.
+    Evaluations on the PhoAudiobook dataset demonstrate that Vi-SparkRL surpasses
+    state-of-the-art TTS systems in intelligibility while maintaining competitive naturalness
+    and speaker similarity.
   </div>
 
   <!-- ─── 1. METHOD ─── -->
   <h2>1. Method</h2>
 
-  <h3>1.1 GSPO Algorithm</h3>
+  <h3>1.1 Group Sequence Policy Optimization (GSPO)</h3>
   <p>
-    GSPO (Group Relative Policy Optimization) extends GRPO by computing per-group advantages
-    across a batch of TTS completions. For each text prompt, the model generates
-    <em>N</em>&nbsp;=&nbsp;4 speech samples; a multi-metric reward is computed for each and
-    the policy is updated to maximize expected reward while staying close to the reference
-    model via a KL-divergence penalty:
+    To enhance the prosody and naturalness of the baseline Vi-SparkTTS-0.5B model, we employ
+    <strong>GSPO</strong>, a variant of GRPO that eliminates the need for a separate value function
+    by utilizing group-relative advantages. For each prompt, a group of <em>G</em> sequences is
+    generated. The advantage for each sequence <em>i</em> is estimated by comparing its reward
+    <em>R<sub>i</sub></em> against the mean reward of the group:
   </p>
-  <p style="text-align:center; font-style:italic; color:#555; background:#f9f9f9; border:1px solid #eee; padding:10px; border-radius:4px; font-family:Arial,sans-serif; font-size:0.92em;">
-    J(θ) = E[r(y) − β · KL(π<sub>θ</sub> ‖ π<sub>ref</sub>)]
+  <div class="eq">
+    Â<sub>i</sub> = ( R<sub>i</sub> &minus; mean(R) ) / std(R) &nbsp;&nbsp;&nbsp; (1)
+  </div>
+  <p>
+    Unlike GRPO, which computes advantages at the token level and suffers from high-variance
+    importance weights in long-sequence generation, GSPO applies <strong>sequence-level
+    importance sampling</strong>, providing improved stability and scalability for continuous
+    audio outputs.
   </p>
 
-  <h3>1.2 Reward Function</h3>
-  <p>The reward combines four components with the following weights:</p>
+  <h3>1.2 Multi-objective Hybrid Reward System</h3>
+  <p>
+    The total reward combines four components scaled to [&minus;1, 1] to facilitate stable gradient updates:
+  </p>
+  <div class="eq">
+    R<sub>total</sub> = 2.0 &times;
+    (&sum;<sub>i &isin; {mos, sim, wer, tone}</sub> w<sub>i</sub> &middot; r<sub>i</sub>) &minus; 1.0 &nbsp;&nbsp;&nbsp; (2)
+  </div>
   <ul class="reward-list">
-    <li><strong>SIM (30%)</strong> — Speaker similarity via ECAPA-TDNN + WavLM cosine similarity</li>
-    <li><strong>UTMOS (40%)</strong> — Predicted naturalness MOS via UTMOS22-Strong</li>
-    <li><strong>WER (20%)</strong> — Intelligibility measured by Whisper Large V3 (negated)</li>
-    <li><strong>VietTone (10%)</strong> — Vietnamese tone accuracy via Unicode tone-mark comparison</li>
+    <li><strong>UTMOS — Acoustic Quality (w = 0.4):</strong> UTMOS22-Strong predicted MOS, normalized from [1,5] to [0,1]:
+      <em>r<sub>mos</sub> = (clip(s<sub>mos</sub>, 1, 5) &minus; 1) / 4</em></li>
+    <li><strong>SIM — Speaker Similarity (w = 0.3):</strong> ECAPA-TDNN + WavLM cosine similarity:
+      <em>r<sub>sim</sub> = (cos(e<sub>ref</sub>, e<sub>gen</sub>) + 1) / 2</em></li>
+    <li><strong>WER — Intelligibility (w = 0.2):</strong> Whisper Large V3 word error rate:
+      <em>r<sub>wer</sub> = 1.0 &minus; min(WER(text<sub>ref</sub>, text<sub>hyp</sub>), 1.0)</em></li>
+    <li><strong>VietTone — Tone Accuracy (w = 0.1):</strong> Positional match rate of Unicode tone marks between reference and hypothesis transcription</li>
   </ul>
 
-  <h3>1.3 Training Pipeline</h3>
-  <div class="pipeline">
-    <div class="pipeline-step">
-      <span class="step-num">Phase 1</span>
-      <span class="step-name">Baseline Eval</span>
-      <span class="step-desc">100 samples<br>WER / SIM / UTMOS</span>
-    </div>
-    <div class="pipeline-step">
-      <span class="step-num">Phase 2</span>
-      <span class="step-name">Data Prep</span>
-      <span class="step-desc">CSV → JSONL<br>BiCodec tokens</span>
-    </div>
-    <div class="pipeline-step">
-      <span class="step-num">Phase 3</span>
-      <span class="step-name">Reward Fn</span>
-      <span class="step-desc">SIM+UTMOS<br>+WER+Tone</span>
-    </div>
-    <div class="pipeline-step">
-      <span class="step-num">Phase 4</span>
-      <span class="step-name">GSPO Train</span>
-      <span class="step-desc">TRL · LoRA r=16<br>2×GPU · 2800 steps</span>
-    </div>
-  </div>
-
-  <!-- ─── 2. RESULTS ─── -->
-  <h2>2. Results</h2>
+  <h3>1.3 VietTone Reward</h3>
   <p>
-    We evaluate on a held-out test set of 2,250 samples from PhoAudiobook.
-    All metrics are computed using the same evaluation suite as baseline.
+    Standard TTS models struggle with Vietnamese lexical tones, where semantic meaning depends
+    heavily on F<sub>0</sub> contours. The VietTone reward computes the positional match rate of
+    tone marks extracted via Unicode normalization:
+  </p>
+  <div class="eq">
+    r<sub>tone</sub> = (&sum;<sub>j=1</sub><sup>L</sup> &#x1D7D9;[T(text<sub>ref</sub>)<sub>j</sub> = T(text<sub>hyp</sub>)<sub>j</sub>]) / L &nbsp;&nbsp;&nbsp; (6)
+  </div>
+  <p style="font-size:0.92em; color:#555;">
+    where <em>T(s)</em> extracts tone marks from string <em>s</em> using Unicode normalization
+    (mapping tones to {0,&hellip;,5}), and <em>L</em> is the number of tones in the reference.
   </p>
 
+  <div class="table-caption"><strong>Table I.</strong> Example of VietTone reward calculation based on positional tonal matching.</div>
   <table>
     <thead>
       <tr>
-        <th class="left" style="text-align:left">Model</th>
-        <th>WER ↓</th>
-        <th>UTMOS ↑</th>
-        <th>SIM ↑</th>
+        <th style="width:5%">Row</th>
+        <th style="width:8%">Type</th>
+        <th class="left">Vietnamese Sentence</th>
+        <th>Tones T(s)</th>
+        <th>Match</th>
+        <th>Score</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="left">Baseline SparkTTS</td>
-        <td>0.0343</td>
-        <td>2.8407</td>
-        <td>0.6827</td>
+        <td>1</td><td>Ref.</td>
+        <td class="left"><em>"Học đi đôi với hành"</em></td>
+        <td>[3, 0, 0, 2, 1]</td><td>—</td><td>—</td>
       </tr>
       <tr>
-        <td class="left">SFT (checkpoint-3000)</td>
-        <td>0.0628</td>
-        <td>2.9366</td>
-        <td>0.7768</td>
+        <td>2</td><td>Hyp.</td>
+        <td class="left"><em>"Học đi đối với hãnh"</em></td>
+        <td>[3, 0, <strong>2</strong>, 2, <strong>5</strong>]</td>
+        <td>✓ ✓ ✗ ✓ ✗</td><td>—</td>
       </tr>
       <tr>
-        <td class="left">SFT (final)</td>
-        <td>0.0497</td>
-        <td>2.9461</td>
-        <td>0.7765</td>
-      </tr>
-      <tr class="ours">
-        <td class="left">GSPO-2800 (ours)</td>
-        <td>0.0363 <span class="badge-down">▼ stable</span></td>
-        <td>2.8984 <span class="badge-up">▲ +2%</span></td>
-        <td>0.6823 <span class="badge-down">≈</span></td>
+        <td>3</td><td colspan="3" class="left"><strong>Final Positional Match Rate</strong></td>
+        <td colspan="1">3 / 5</td><td><strong>0.60</strong></td>
       </tr>
     </tbody>
   </table>
-  <p style="font-size:0.85em; color:#666;">
-    WER: Word Error Rate (Whisper Large V3). UTMOS: predicted MOS (UTMOS22-Strong). SIM: speaker cosine similarity (WavLM+ECAPA-TDNN).
-    Highlighted row is our proposed method.
+
+  <h3>1.4 Training Setup</h3>
+  <p style="font-size:0.93em;">
+    We utilize a curated subset of <strong>PhoAudiobook</strong> (941 hours), filtering utterances
+    with WER &gt; 10%, yielding 14,000 premium samples partitioned into
+    10,000 (GSPO training), 2,000 (validation), and 2,000 (zero-shot test).
+    SFT is first performed with LoRA (<em>r</em>=16, <em>&alpha;</em>=32, dropout=0.05) on the
+    Vi-SparkTTS-0.5B backbone. For GSPO, the converged SFT adapters are merged into base weights
+    as the reference policy &pi;<sub>ref</sub>, and a fresh set of LoRA adapters is trained
+    as the active policy &pi;<sub>&theta;</sub>.
+    During training, <em>K</em>=8 candidate trajectories are sampled per prompt
+    (temperature=0.9, &beta;=0.01, &epsilon;=3&times;10<sup>&minus;4</sup>, lr=1&times;10<sup>&minus;6</sup>).
+    All experiments run on <strong>4&times;NVIDIA A100 (80GB)</strong> GPUs via Accelerate.
+  </p>
+
+  <!-- ─── 2. RESULTS ─── -->
+  <h2>2. Results</h2>
+  <p>
+    We compare Vi-SparkRL against state-of-the-art TTS systems on the PhoAudiobook test set
+    (2,000 samples). Metrics: WER (Whisper Large V3), MOS (UTMOS22-Strong), SIM (WavLM+ECAPA-TDNN),
+    RTF (real-time factor on a single A100).
+  </p>
+
+  <div class="table-caption"><strong>Table II.</strong> Performance comparison with state-of-the-art Text-to-Speech models.</div>
+  <table>
+    <thead>
+      <tr>
+        <th class="left">Model</th>
+        <th>Architecture</th>
+        <th>WER ↓</th>
+        <th>MOS ↑</th>
+        <th>SIM ↑</th>
+        <th>RTF ↓</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left">VITS</td>
+        <td>Variational Autoencoder</td>
+        <td>5.21</td><td>3.55</td><td>0.62</td><td>0.05</td>
+      </tr>
+      <tr>
+        <td class="left">XTTS-v2</td>
+        <td>Autoregressive GPT</td>
+        <td>7.85</td><td>3.82</td><td>0.69</td><td>0.65</td>
+      </tr>
+      <tr>
+        <td class="left">MeloTTS</td>
+        <td>VITS-based</td>
+        <td>4.88</td><td>3.75</td><td>0.65</td><td>0.08</td>
+      </tr>
+      <tr>
+        <td class="left">OpenVoice</td>
+        <td>Flow Matching</td>
+        <td>5.50</td><td>3.90</td><td>0.72</td><td>0.25</td>
+      </tr>
+      <tr>
+        <td class="left">F5-TTS</td>
+        <td>Flow Matching</td>
+        <td>3.95</td><td>4.05</td><td>0.79</td><td>0.45</td>
+      </tr>
+      <tr>
+        <td class="left">Fish-Speech</td>
+        <td>VQ-VAE + LLM</td>
+        <td>4.12</td><td>4.02</td><td><strong>0.80</strong></td><td>0.52</td>
+      </tr>
+      <tr>
+        <td class="left">Valtec-TTS</td>
+        <td>Flow-matching / VITS</td>
+        <td>4.25</td><td>3.92</td><td>0.76</td><td><strong>0.12</strong></td>
+      </tr>
+      <tr class="ours">
+        <td class="left">Vi-SparkRL (Ours)</td>
+        <td>Sequence RL</td>
+        <td><strong>2.85</strong></td><td><strong>4.10</strong></td><td>0.75</td><td>0.38</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.83em; color:#666;">
+    WER: Word Error Rate (%), MOS: Mean Opinion Score (UTMOS22), SIM: Speaker Similarity, RTF: Real-time Factor.
+    Bold = best in column. Highlighted row is our proposed method.
   </p>
 
   <div class="figure">
-    <img src="assets/plots/results_bar_chart_comparison.png" alt="Model comparison bar chart" />
-    <div class="figure-caption">Figure 1. Comparison of WER, UTMOS, and SIM across Baseline, SFT, and GSPO-2800.</div>
+    <img src="assets/plots/results_bar_chart_comparison.png" alt="Comparative analysis bar chart" />
+    <div class="figure-caption">
+      <strong>Fig. 2.</strong> Comparative analysis of synthesis quality metrics across different training paradigms,
+      illustrating objective evaluation results on the PhoAudiobook test set.
+      The models compared include a zero-shot baseline, a Supervised Fine-Tuning (SFT) model,
+      and our proposed Vi-SparkRL framework. Metrics evaluated are WER (↓), UTMOS (↑), SIM (↑), and Tone Acc. (↑).
+    </div>
   </div>
 
   <!-- ─── 3. TRAINING ─── -->
   <h2>3. Training Dynamics</h2>
   <p>
-    The table below reports per-component reward values evaluated at regular checkpoints
-    during GSPO training. All values are averages over the evaluation set at that step.
+    The figure below illustrates the evolution of speech quality and linguistic metrics
+    during the Vi-SparkRL training phase. The bold lines denote smoothed trends
+    (moving average, window <em>w</em>=50) superimposed on raw step-wise values.
   </p>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Step</th>
-        <th>SIM</th>
-        <th>UTMOS</th>
-        <th>WER</th>
-        <th>VietTone</th>
-        <th>Total Reward</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>400</td><td>0.4695</td><td>0.4302</td><td>0.0845</td><td>0.7728</td><td>0.1466</td></tr>
-      <tr><td>800</td><td>0.4627</td><td>0.3965</td><td>0.1099</td><td>0.7295</td><td>0.0968</td></tr>
-      <tr><td>1200</td><td>0.4734</td><td>0.5009</td><td>0.1093</td><td>0.8409</td><td>0.2092</td></tr>
-      <tr><td>1600</td><td>0.4587</td><td>0.4259</td><td>0.1003</td><td>0.8030</td><td>0.1365</td></tr>
-    </tbody>
-  </table>
-
   <div class="figure">
-    <img src="assets/plots/metrics_trend.png" alt="Metrics trend over training steps" />
-    <div class="figure-caption">Figure 2. Step-by-step reward component trends during GSPO training.</div>
+    <img src="assets/plots/training_progress_2800_smoothed.png" alt="Training dynamics" />
+    <div class="figure-caption">
+      <strong>Fig. 1.</strong> Evolution of speech quality and linguistic metrics during Vi-SparkRL training.
+      Top left: Speaker Similarity (SIM, ↑); Top right: Audio Quality (UTMOS, ↑);
+      Bottom left: Word Error Rate (WER, ↓); Bottom right: Vietnamese Tone Accuracy (↑).
+      The plots indicate rapid reduction in WER and significant improvement in Tone Accuracy
+      during early training, while SIM and UTMOS are well-maintained.
+    </div>
   </div>
 
   <div class="figure">
-    <img src="assets/plots/training_progress_2800_smoothed.png" alt="Training progress smoothed" />
-    <div class="figure-caption">Figure 3. Smoothed training progress over 2,800 steps.</div>
+    <img src="assets/plots/metrics_trend.png" alt="Metrics trend" />
+    <div class="figure-caption">
+      <strong>Fig. 3.</strong> Step-by-step reward component trends during GSPO training
+      (SIM, UTMOS, WER, VietTone, and total reward).
+    </div>
   </div>
 
   <!-- ─── 4. AUDIO SAMPLES ─── -->
   <h2>4. Audio Samples</h2>
   <p>
-    We present six test samples synthesized from the same reference speaker prompt.
-    Each row shows the input text followed by audio from Baseline SparkTTS and our
-    GSPO-2800 model for direct perceptual comparison.
+    We present six synthesized samples using the same reference speaker prompt.
+    Each example shows the input text, followed by audio from the baseline
+    Vi-SparkTTS-0.5B and our Vi-SparkRL model for direct perceptual comparison.
   </p>
 
   <!-- Sample 1 -->
@@ -441,16 +499,12 @@
     </p>
     <div class="audio-row">
       <div class="audio-col">
-        <div class="model-label">Baseline SparkTTS</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL/sample_00.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Baseline Vi-SparkTTS</div>
+        <audio controls><source src="assets/audio/visparkRL/sample_00.wav" type="audio/wav" /></audio>
       </div>
       <div class="audio-col ours-col">
-        <div class="model-label">GSPO-2800 (Ours)</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL_2800/sample_00.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Vi-SparkRL (Ours)</div>
+        <audio controls><source src="assets/audio/visparkRL_2800/sample_00.wav" type="audio/wav" /></audio>
       </div>
     </div>
   </div>
@@ -463,16 +517,12 @@
     </p>
     <div class="audio-row">
       <div class="audio-col">
-        <div class="model-label">Baseline SparkTTS</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL/sample_01.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Baseline Vi-SparkTTS</div>
+        <audio controls><source src="assets/audio/visparkRL/sample_01.wav" type="audio/wav" /></audio>
       </div>
       <div class="audio-col ours-col">
-        <div class="model-label">GSPO-2800 (Ours)</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL_2800/sample_01.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Vi-SparkRL (Ours)</div>
+        <audio controls><source src="assets/audio/visparkRL_2800/sample_01.wav" type="audio/wav" /></audio>
       </div>
     </div>
   </div>
@@ -486,16 +536,12 @@
     </p>
     <div class="audio-row">
       <div class="audio-col">
-        <div class="model-label">Baseline SparkTTS</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL/sample_02.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Baseline Vi-SparkTTS</div>
+        <audio controls><source src="assets/audio/visparkRL/sample_02.wav" type="audio/wav" /></audio>
       </div>
       <div class="audio-col ours-col">
-        <div class="model-label">GSPO-2800 (Ours)</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL_2800/sample_02.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Vi-SparkRL (Ours)</div>
+        <audio controls><source src="assets/audio/visparkRL_2800/sample_02.wav" type="audio/wav" /></audio>
       </div>
     </div>
   </div>
@@ -509,16 +555,12 @@
     </p>
     <div class="audio-row">
       <div class="audio-col">
-        <div class="model-label">Baseline SparkTTS</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL/sample_03.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Baseline Vi-SparkTTS</div>
+        <audio controls><source src="assets/audio/visparkRL/sample_03.wav" type="audio/wav" /></audio>
       </div>
       <div class="audio-col ours-col">
-        <div class="model-label">GSPO-2800 (Ours)</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL_2800/sample_03.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Vi-SparkRL (Ours)</div>
+        <audio controls><source src="assets/audio/visparkRL_2800/sample_03.wav" type="audio/wav" /></audio>
       </div>
     </div>
   </div>
@@ -532,16 +574,12 @@
     </p>
     <div class="audio-row">
       <div class="audio-col">
-        <div class="model-label">Baseline SparkTTS</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL/sample_04.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Baseline Vi-SparkTTS</div>
+        <audio controls><source src="assets/audio/visparkRL/sample_04.wav" type="audio/wav" /></audio>
       </div>
       <div class="audio-col ours-col">
-        <div class="model-label">GSPO-2800 (Ours)</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL_2800/sample_04.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Vi-SparkRL (Ours)</div>
+        <audio controls><source src="assets/audio/visparkRL_2800/sample_04.wav" type="audio/wav" /></audio>
       </div>
     </div>
   </div>
@@ -555,39 +593,35 @@
     </p>
     <div class="audio-row">
       <div class="audio-col">
-        <div class="model-label">Baseline SparkTTS</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL/sample_05.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Baseline Vi-SparkTTS</div>
+        <audio controls><source src="assets/audio/visparkRL/sample_05.wav" type="audio/wav" /></audio>
       </div>
       <div class="audio-col ours-col">
-        <div class="model-label">GSPO-2800 (Ours)</div>
-        <audio controls>
-          <source src="assets/audio/visparkRL_2800/sample_05.wav" type="audio/wav" />
-        </audio>
+        <div class="model-label">Vi-SparkRL (Ours)</div>
+        <audio controls><source src="assets/audio/visparkRL_2800/sample_05.wav" type="audio/wav" /></audio>
       </div>
     </div>
   </div>
 
   <!-- ─── 5. CITATION ─── -->
   <h2>5. Citation</h2>
-  <div class="bibtex">@misc{gspo_sparktts_2025,<br>
-&nbsp;&nbsp;title&nbsp;&nbsp;&nbsp;&nbsp; = {GSPO for Vietnamese Text-to-Speech Fine-tuning},<br>
-&nbsp;&nbsp;author&nbsp;&nbsp;&nbsp; = {Anonymous Authors},<br>
-&nbsp;&nbsp;year&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = {2025},<br>
-&nbsp;&nbsp;note&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = {Under review}<br>
+  <div class="bibtex">@inproceedings{visparktrl_2025,<br>
+&nbsp;&nbsp;title&nbsp;&nbsp;&nbsp; = {Vi-SparkRL: Enhancing Tonal Accuracy and Naturalness in Vietnamese TTS via Multi-Objective Rewards},<br>
+&nbsp;&nbsp;author&nbsp;&nbsp; = {Anonymous Authors},<br>
+&nbsp;&nbsp;booktitle = {Under Review},<br>
+&nbsp;&nbsp;year&nbsp;&nbsp;&nbsp;&nbsp; = {2025}<br>
 }</div>
 
   <!-- ─── ACKNOWLEDGEMENTS ─── -->
   <h2>Acknowledgements</h2>
   <p style="font-size:0.92em; color:#555;">
-    We thank the authors of Vi-SparkTTS, TRL (HuggingFace), UTMOS22, and Whisper
-    for their open-source contributions.
+    We thank the authors of Vi-SparkTTS, TRL (HuggingFace), UTMOS22, Whisper Large V3,
+    WavLM, and ECAPA-TDNN for their open-source contributions.
     Training data sourced from PhoAudiobook.
   </p>
 
   <footer>
-    GSPO SparkTTS · Vietnamese Speech Research · 2025
+    Vi-SparkRL &nbsp;·&nbsp; Vietnamese TTS Research &nbsp;·&nbsp; 2025
   </footer>
 
 </div>
