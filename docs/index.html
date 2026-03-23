@@ -3,496 +3,597 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GSPO SparkTTS — Vietnamese TTS Fine-tuning</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>GSPO for Vietnamese TTS Fine-tuning</title>
   <style>
-    html { scroll-behavior: smooth; }
-    .audio-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
-    audio { width: 100%; height: 32px; }
-    audio::-webkit-media-controls-panel { background: #f1f5f9; }
-    pre code { font-size: 0.78rem; }
-    .reward-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    /* ── Title & Authors ── */
+    h1 {
+      font-size: 2em;
+      font-weight: bold;
+      color: #111;
+      text-align: center;
+      margin-bottom: 0.4em;
+      line-height: 1.3;
+    }
+    .authors {
+      text-align: center;
+      color: #555;
+      font-size: 1em;
+      margin-bottom: 0.2em;
+    }
+    .affiliation {
+      text-align: center;
+      color: #777;
+      font-size: 0.9em;
+      margin-bottom: 1.5em;
+    }
+    .links {
+      text-align: center;
+      margin-bottom: 2em;
+    }
+    .links a {
+      display: inline-block;
+      margin: 0 8px;
+      padding: 5px 14px;
+      border: 1px solid #999;
+      border-radius: 4px;
+      color: #333;
+      text-decoration: none;
+      font-family: Arial, sans-serif;
+      font-size: 0.88em;
+    }
+    .links a:hover { background: #f0f0f0; }
+
+    /* ── Abstract ── */
+    .abstract {
+      border-left: 5px solid #ddd;
+      background: #f9f9f9;
+      padding: 14px 18px;
+      margin-bottom: 2em;
+      font-style: italic;
+      color: #444;
+      font-size: 0.95em;
+    }
+    .abstract strong { font-style: normal; }
+
+    /* ── Section headings ── */
+    h2 {
+      font-size: 1.35em;
+      color: #111;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 4px;
+      margin-top: 2.2em;
+      margin-bottom: 0.8em;
+    }
+    h3 {
+      font-size: 1.1em;
+      color: #222;
+      margin-top: 1.4em;
+      margin-bottom: 0.5em;
+    }
+
+    /* ── Figures ── */
+    .figure {
+      text-align: center;
+      margin: 1.5em 0;
+    }
+    .figure img {
+      max-width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .figure-caption {
+      font-size: 0.88em;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, sans-serif;
+      font-size: 0.9em;
+      margin: 1em 0;
+    }
+    th {
+      background: #f4f4f4;
+      font-weight: bold;
+      padding: 8px 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    td {
+      padding: 7px 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    tr:nth-child(even) td { background: #f9f9f9; }
+    .ours td { background: #e6f3ff !important; font-weight: bold; }
+    td.left { text-align: left; }
+    .badge-up   { color: #2a7a2a; font-size: 0.82em; }
+    .badge-down { color: #c0392b; font-size: 0.82em; }
+
+    /* ── Reward component list ── */
+    .reward-list {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 12px 18px;
+      font-family: Arial, sans-serif;
+      font-size: 0.92em;
+    }
+    .reward-list li { margin-bottom: 4px; }
+
+    /* ── Audio samples ── */
+    .sample-block {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      background: #fff;
+    }
+    .sample-text {
+      font-style: italic;
+      color: #555;
+      margin-bottom: 10px;
+      font-size: 0.95em;
+    }
+    .sample-text strong { font-style: normal; color: #333; }
+    .audio-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .audio-col {
+      flex: 1;
+      min-width: 200px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .audio-col .model-label {
+      font-family: Arial, sans-serif;
+      font-size: 0.82em;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .audio-col.ours-col .model-label { color: #1a5fa8; }
+    audio {
+      width: 100%;
+      height: 40px;
+    }
+
+    /* ── Pipeline steps ── */
+    .pipeline {
+      display: flex;
+      gap: 0;
+      margin: 1em 0;
+      font-family: Arial, sans-serif;
+      font-size: 0.88em;
+    }
+    .pipeline-step {
+      flex: 1;
+      text-align: center;
+      padding: 10px 8px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+      position: relative;
+    }
+    .pipeline-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      font-size: 1.1em;
+      z-index: 1;
+    }
+    .pipeline-step .step-num {
+      font-weight: bold;
+      color: #555;
+      display: block;
+      font-size: 0.85em;
+    }
+    .pipeline-step .step-name {
+      font-weight: bold;
+      display: block;
+      color: #222;
+      margin: 2px 0;
+    }
+    .pipeline-step .step-desc {
+      color: #666;
+      font-size: 0.82em;
+    }
+
+    /* ── Code block ── */
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px 20px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.82em;
+      line-height: 1.5;
+    }
+    code { font-family: 'Courier New', Courier, monospace; }
+    pre .comment { color: #6a9955; }
+
+    /* ── Citation ── */
+    .bibtex {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 14px 18px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.82em;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 3em;
+      text-align: center;
+      font-size: 0.8em;
+      color: #999;
+      border-top: 1px solid #eee;
+      padding-top: 1em;
+    }
   </style>
 </head>
-<body class="bg-white text-gray-800 font-sans">
+<body>
+<div class="container">
 
-<!-- ───────────── NAV ───────────── -->
-<nav class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
-  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-    <span class="font-bold text-indigo-600 text-lg tracking-tight">GSPO&nbsp;SparkTTS</span>
-    <ul class="hidden sm:flex gap-6 text-sm text-gray-600 font-medium">
-      <li><a href="#method"   class="hover:text-indigo-600 transition">Method</a></li>
-      <li><a href="#results"  class="hover:text-indigo-600 transition">Results</a></li>
-      <li><a href="#training" class="hover:text-indigo-600 transition">Training</a></li>
-      <li><a href="#demo"     class="hover:text-indigo-600 transition">Demo</a></li>
-      <li><a href="#code"     class="hover:text-indigo-600 transition">Code</a></li>
-      <li><a href="#citation" class="hover:text-indigo-600 transition">Cite</a></li>
-    </ul>
+  <!-- ─── TITLE ─── -->
+  <h1>GSPO for Vietnamese Text-to-Speech Fine-tuning</h1>
+  <p class="authors">Dinh Xuan Binh, Nguyen Duc Anh, &amp; Team</p>
+  <p class="affiliation">Vietnamese Speech Research</p>
+  <div class="links">
+    <a href="https://github.com/Dinhxuanbinh/gspo_sparktts">&#128196; Code</a>
   </div>
-</nav>
 
-<!-- ───────────── HERO ───────────── -->
-<section class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 pt-20 pb-16 px-4">
-  <div class="max-w-3xl mx-auto text-center">
-    <div class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-6">
-      Vietnamese TTS · Reinforcement Learning · 2025
+  <!-- ─── ABSTRACT ─── -->
+  <div class="abstract">
+    <strong>Abstract.</strong>
+    We present a reinforcement learning approach to fine-tune <strong>Vi-SparkTTS-0.5B</strong>,
+    a Vietnamese large language model-based text-to-speech system, using
+    <strong>Group Relative Policy Optimization (GSPO)</strong>.
+    Our method optimizes a multi-component reward function that jointly targets
+    naturalness (UTMOS), intelligibility (WER), speaker similarity (SIM), and
+    Vietnamese tone accuracy (VietTone), applied via LoRA adaptation over 2,800 training steps
+    on 5,000 PhoAudiobook samples.
+    The GSPO-trained model achieves improved naturalness scores (+2% UTMOS) while
+    maintaining speaker similarity, demonstrating the viability of
+    policy-gradient methods for TTS quality optimization.
+  </div>
+
+  <!-- ─── 1. METHOD ─── -->
+  <h2>1. Method</h2>
+
+  <h3>1.1 GSPO Algorithm</h3>
+  <p>
+    GSPO (Group Relative Policy Optimization) extends GRPO by computing per-group advantages
+    across a batch of TTS completions. For each text prompt, the model generates
+    <em>N</em>&nbsp;=&nbsp;4 speech samples; a multi-metric reward is computed for each and
+    the policy is updated to maximize expected reward while staying close to the reference
+    model via a KL-divergence penalty:
+  </p>
+  <p style="text-align:center; font-style:italic; color:#555; background:#f9f9f9; border:1px solid #eee; padding:10px; border-radius:4px; font-family:Arial,sans-serif; font-size:0.92em;">
+    J(θ) = E[r(y) − β · KL(π<sub>θ</sub> ‖ π<sub>ref</sub>)]
+  </p>
+
+  <h3>1.2 Reward Function</h3>
+  <p>The reward combines four components with the following weights:</p>
+  <ul class="reward-list">
+    <li><strong>SIM (30%)</strong> — Speaker similarity via ECAPA-TDNN + WavLM cosine similarity</li>
+    <li><strong>UTMOS (40%)</strong> — Predicted naturalness MOS via UTMOS22-Strong</li>
+    <li><strong>WER (20%)</strong> — Intelligibility measured by Whisper Large V3 (negated)</li>
+    <li><strong>VietTone (10%)</strong> — Vietnamese tone accuracy via Unicode tone-mark comparison</li>
+  </ul>
+
+  <h3>1.3 Training Pipeline</h3>
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <span class="step-num">Phase 1</span>
+      <span class="step-name">Baseline Eval</span>
+      <span class="step-desc">100 samples<br>WER / SIM / UTMOS</span>
     </div>
-    <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
-      GSPO for Vietnamese<br class="hidden sm:block" /> TTS Fine-tuning
-    </h1>
-    <p class="text-lg text-gray-600 mb-8 max-w-xl mx-auto">
-      Fine-tuning <strong>Vi-SparkTTS-0.5B</strong> with Group Relative Policy Optimization (GSPO)
-      using a multi-component reward function for improved naturalness, intelligibility, and speaker similarity.
+    <div class="pipeline-step">
+      <span class="step-num">Phase 2</span>
+      <span class="step-name">Data Prep</span>
+      <span class="step-desc">CSV → JSONL<br>BiCodec tokens</span>
+    </div>
+    <div class="pipeline-step">
+      <span class="step-num">Phase 3</span>
+      <span class="step-name">Reward Fn</span>
+      <span class="step-desc">SIM+UTMOS<br>+WER+Tone</span>
+    </div>
+    <div class="pipeline-step">
+      <span class="step-num">Phase 4</span>
+      <span class="step-name">GSPO Train</span>
+      <span class="step-desc">TRL · LoRA r=16<br>2×GPU · 2800 steps</span>
+    </div>
+  </div>
+
+  <!-- ─── 2. RESULTS ─── -->
+  <h2>2. Results</h2>
+  <p>
+    We evaluate on a held-out test set of 2,250 samples from PhoAudiobook.
+    All metrics are computed using the same evaluation suite as baseline.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="left" style="text-align:left">Model</th>
+        <th>WER ↓</th>
+        <th>UTMOS ↑</th>
+        <th>SIM ↑</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left">Baseline SparkTTS</td>
+        <td>0.0343</td>
+        <td>2.8407</td>
+        <td>0.6827</td>
+      </tr>
+      <tr>
+        <td class="left">SFT (checkpoint-3000)</td>
+        <td>0.0628</td>
+        <td>2.9366</td>
+        <td>0.7768</td>
+      </tr>
+      <tr>
+        <td class="left">SFT (final)</td>
+        <td>0.0497</td>
+        <td>2.9461</td>
+        <td>0.7765</td>
+      </tr>
+      <tr class="ours">
+        <td class="left">GSPO-2800 (ours)</td>
+        <td>0.0363 <span class="badge-down">▼ stable</span></td>
+        <td>2.8984 <span class="badge-up">▲ +2%</span></td>
+        <td>0.6823 <span class="badge-down">≈</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.85em; color:#666;">
+    WER: Word Error Rate (Whisper Large V3). UTMOS: predicted MOS (UTMOS22-Strong). SIM: speaker cosine similarity (WavLM+ECAPA-TDNN).
+    Highlighted row is our proposed method.
+  </p>
+
+  <div class="figure">
+    <img src="assets/plots/results_bar_chart_comparison.png" alt="Model comparison bar chart" />
+    <div class="figure-caption">Figure 1. Comparison of WER, UTMOS, and SIM across Baseline, SFT, and GSPO-2800.</div>
+  </div>
+
+  <!-- ─── 3. TRAINING ─── -->
+  <h2>3. Training Dynamics</h2>
+  <p>
+    The table below reports per-component reward values evaluated at regular checkpoints
+    during GSPO training. All values are averages over the evaluation set at that step.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Step</th>
+        <th>SIM</th>
+        <th>UTMOS</th>
+        <th>WER</th>
+        <th>VietTone</th>
+        <th>Total Reward</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>400</td><td>0.4695</td><td>0.4302</td><td>0.0845</td><td>0.7728</td><td>0.1466</td></tr>
+      <tr><td>800</td><td>0.4627</td><td>0.3965</td><td>0.1099</td><td>0.7295</td><td>0.0968</td></tr>
+      <tr><td>1200</td><td>0.4734</td><td>0.5009</td><td>0.1093</td><td>0.8409</td><td>0.2092</td></tr>
+      <tr><td>1600</td><td>0.4587</td><td>0.4259</td><td>0.1003</td><td>0.8030</td><td>0.1365</td></tr>
+    </tbody>
+  </table>
+
+  <div class="figure">
+    <img src="assets/plots/metrics_trend.png" alt="Metrics trend over training steps" />
+    <div class="figure-caption">Figure 2. Step-by-step reward component trends during GSPO training.</div>
+  </div>
+
+  <div class="figure">
+    <img src="assets/plots/training_progress_2800_smoothed.png" alt="Training progress smoothed" />
+    <div class="figure-caption">Figure 3. Smoothed training progress over 2,800 steps.</div>
+  </div>
+
+  <!-- ─── 4. AUDIO SAMPLES ─── -->
+  <h2>4. Audio Samples</h2>
+  <p>
+    We present six test samples synthesized from the same reference speaker prompt.
+    Each row shows the input text followed by audio from Baseline SparkTTS and our
+    GSPO-2800 model for direct perceptual comparison.
+  </p>
+
+  <!-- Sample 1 -->
+  <div class="sample-block">
+    <p class="sample-text">
+      <strong>Sample 1.</strong>
+      &ldquo;Anh chị ở bình dương, sau bốn năm làm overtime anh ấy tậu con xe Honda Civic&rdquo;
     </p>
-    <!-- Stat chips -->
-    <div class="flex flex-wrap justify-center gap-3 mb-8">
-      <span class="bg-white border border-gray-200 rounded-full px-4 py-1.5 text-sm font-medium shadow-sm">0.5B params</span>
-      <span class="bg-white border border-gray-200 rounded-full px-4 py-1.5 text-sm font-medium shadow-sm">5,000 samples</span>
-      <span class="bg-white border border-gray-200 rounded-full px-4 py-1.5 text-sm font-medium shadow-sm">2,800 train steps</span>
-      <span class="bg-white border border-gray-200 rounded-full px-4 py-1.5 text-sm font-medium shadow-sm">4-component reward</span>
-      <span class="bg-white border border-gray-200 rounded-full px-4 py-1.5 text-sm font-medium shadow-sm">LoRA · 2×GPU</span>
-    </div>
-    <div class="flex justify-center gap-4 flex-wrap">
-      <a href="#results" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition">View Results ↓</a>
-      <a href="#demo"    class="bg-white border border-indigo-300 hover:bg-indigo-50 text-indigo-700 font-semibold px-6 py-2.5 rounded-lg shadow transition">Listen to Demos ↓</a>
-    </div>
-  </div>
-</section>
-
-<!-- ───────────── METHOD ───────────── -->
-<section id="method" class="py-16 px-4 bg-white">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Method</h2>
-    <p class="text-gray-500 mb-8 text-sm">GSPO · Reward Design · Training Pipeline</p>
-
-    <div class="grid sm:grid-cols-2 gap-8 mb-10">
-      <div>
-        <h3 class="font-semibold text-gray-800 mb-2">About GSPO</h3>
-        <p class="text-gray-600 text-sm leading-relaxed">
-          GSPO (Group Relative Policy Optimization) extends GRPO by computing per-group advantages
-          across a batch of TTS completions. For each text prompt, the model generates
-          <em>N = 4</em> speech samples; a multi-metric reward signal is computed for each, and
-          the policy is updated to maximize expected reward while staying close to the reference
-          model via a KL-divergence penalty.
-        </p>
-        <p class="text-gray-600 text-sm leading-relaxed mt-2">
-          The backbone is <strong>Vi-SparkTTS-0.5B</strong> (LLM-based Vietnamese TTS), adapted with
-          LoRA (r=16, α=32) and trained with TRL's GSPO trainer using 2×GPU distributed training.
-        </p>
+    <div class="audio-row">
+      <div class="audio-col">
+        <div class="model-label">Baseline SparkTTS</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL/sample_00.wav" type="audio/wav" />
+        </audio>
       </div>
-      <div>
-        <h3 class="font-semibold text-gray-800 mb-3">Reward Function</h3>
-        <div class="space-y-3">
-          <!-- SIM -->
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">SIM — Speaker Similarity</span>
-              <span class="text-indigo-600 font-bold">30%</span>
-            </div>
-            <div class="bg-gray-100 rounded-full overflow-hidden h-2">
-              <div class="reward-bar" style="width:30%"></div>
-            </div>
-            <p class="text-gray-400 text-xs mt-0.5">ECAPA-TDNN + WavLM encoder cosine similarity</p>
-          </div>
-          <!-- UTMOS -->
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">UTMOS — Naturalness MOS</span>
-              <span class="text-indigo-600 font-bold">40%</span>
-            </div>
-            <div class="bg-gray-100 rounded-full overflow-hidden h-2">
-              <div class="reward-bar" style="width:40%"></div>
-            </div>
-            <p class="text-gray-400 text-xs mt-0.5">UTMOS22-Strong predicted MOS score</p>
-          </div>
-          <!-- WER -->
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">WER — Intelligibility</span>
-              <span class="text-indigo-600 font-bold">20%</span>
-            </div>
-            <div class="bg-gray-100 rounded-full overflow-hidden h-2">
-              <div class="reward-bar" style="width:20%"></div>
-            </div>
-            <p class="text-gray-400 text-xs mt-0.5">Whisper Large V3 ASR error rate (lower = better)</p>
-          </div>
-          <!-- VietTone -->
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">VietTone — Tone Accuracy</span>
-              <span class="text-indigo-600 font-bold">10%</span>
-            </div>
-            <div class="bg-gray-100 rounded-full overflow-hidden h-2">
-              <div class="reward-bar" style="width:10%"></div>
-            </div>
-            <p class="text-gray-400 text-xs mt-0.5">Unicode tone-mark comparison between reference and transcript</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pipeline -->
-    <h3 class="font-semibold text-gray-800 mb-4">4-Phase Training Pipeline</h3>
-    <div class="grid sm:grid-cols-4 gap-3">
-      <div class="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
-        <div class="text-xs font-bold text-indigo-500 mb-1">PHASE 1</div>
-        <div class="font-semibold text-sm text-gray-800">Baseline Eval</div>
-        <div class="text-xs text-gray-500 mt-1">Run SparkTTS on 100 samples · compute WER / SIM / UTMOS</div>
-      </div>
-      <div class="bg-purple-50 rounded-xl p-4 border border-purple-100">
-        <div class="text-xs font-bold text-purple-500 mb-1">PHASE 2</div>
-        <div class="font-semibold text-sm text-gray-800">Data Prep</div>
-        <div class="text-xs text-gray-500 mt-1">CSV → JSONL with BiCodec tokens · 5,000 PhoAudiobook samples</div>
-      </div>
-      <div class="bg-pink-50 rounded-xl p-4 border border-pink-100">
-        <div class="text-xs font-bold text-pink-500 mb-1">PHASE 3</div>
-        <div class="font-semibold text-sm text-gray-800">Reward Fn</div>
-        <div class="text-xs text-gray-500 mt-1">Mixed reward: SIM + UTMOS + WER + VietTone computed live</div>
-      </div>
-      <div class="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
-        <div class="text-xs font-bold text-emerald-500 mb-1">PHASE 4</div>
-        <div class="font-semibold text-sm text-gray-800">GSPO Train</div>
-        <div class="text-xs text-gray-500 mt-1">TRL GSPO · LoRA r=16 · 2×GPU · lr=1e-6 · 2,800 steps</div>
+      <div class="audio-col ours-col">
+        <div class="model-label">GSPO-2800 (Ours)</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL_2800/sample_00.wav" type="audio/wav" />
+        </audio>
       </div>
     </div>
   </div>
-</section>
 
-<!-- ───────────── RESULTS ───────────── -->
-<section id="results" class="py-16 px-4 bg-gray-50">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Results</h2>
-    <p class="text-gray-500 mb-8 text-sm">Evaluation on 2,250 held-out test samples</p>
-
-    <!-- Metrics table -->
-    <div class="overflow-x-auto mb-8">
-      <table class="w-full text-sm border-collapse bg-white rounded-xl shadow-sm overflow-hidden">
-        <thead>
-          <tr class="bg-indigo-600 text-white">
-            <th class="px-5 py-3 text-left font-semibold">Model</th>
-            <th class="px-5 py-3 text-center font-semibold">WER ↓</th>
-            <th class="px-5 py-3 text-center font-semibold">UTMOS ↑</th>
-            <th class="px-5 py-3 text-center font-semibold">SIM ↑</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr class="hover:bg-gray-50">
-            <td class="px-5 py-3 font-medium">Baseline SparkTTS</td>
-            <td class="px-5 py-3 text-center text-gray-600">0.0343</td>
-            <td class="px-5 py-3 text-center text-gray-600">2.8407</td>
-            <td class="px-5 py-3 text-center text-gray-600">0.6827</td>
-          </tr>
-          <tr class="hover:bg-gray-50">
-            <td class="px-5 py-3 font-medium">SFT (supervised fine-tune)</td>
-            <td class="px-5 py-3 text-center text-gray-600">0.0497</td>
-            <td class="px-5 py-3 text-center font-semibold text-emerald-600">2.9461</td>
-            <td class="px-5 py-3 text-center font-semibold text-emerald-600">0.7765</td>
-          </tr>
-          <tr class="bg-indigo-50 hover:bg-indigo-100">
-            <td class="px-5 py-3 font-bold text-indigo-700">GSPO-2800 (ours)</td>
-            <td class="px-5 py-3 text-center text-gray-600">0.0363</td>
-            <td class="px-5 py-3 text-center font-semibold text-indigo-700">2.8984 <span class="text-xs text-emerald-500">▲+2%</span></td>
-            <td class="px-5 py-3 text-center text-gray-600">0.6823</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p class="text-xs text-gray-400 mb-8">
-      * WER = Word Error Rate (Whisper Large V3), UTMOS = predicted MOS (UTMOS22-Strong), SIM = speaker cosine similarity (WavLM).
-      SFT evaluated on checkpoint-3000; GSPO evaluated at step 2800.
+  <!-- Sample 2 -->
+  <div class="sample-block">
+    <p class="sample-text">
+      <strong>Sample 2.</strong>
+      &ldquo;Em gái học ở sài gòn, chỉ cần một năm làm part-time là em sắm laptop gaming xịn sò&rdquo;
     </p>
-
-    <!-- Bar chart image -->
-    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-      <h3 class="font-semibold text-gray-700 text-sm mb-3">Model Comparison</h3>
-      <img src="assets/plots/results_bar_chart_comparison.png"
-           alt="Model comparison bar chart"
-           class="w-full rounded-lg" />
-    </div>
-  </div>
-</section>
-
-<!-- ───────────── TRAINING ───────────── -->
-<section id="training" class="py-16 px-4 bg-white">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Training Dynamics</h2>
-    <p class="text-gray-500 mb-8 text-sm">Step-by-step reward components during GSPO training</p>
-
-    <!-- Training progress table -->
-    <div class="overflow-x-auto mb-8">
-      <table class="w-full text-sm border-collapse bg-white rounded-xl shadow-sm overflow-hidden">
-        <thead>
-          <tr class="bg-gray-700 text-white">
-            <th class="px-4 py-3 text-center font-semibold">Step</th>
-            <th class="px-4 py-3 text-center font-semibold">SIM</th>
-            <th class="px-4 py-3 text-center font-semibold">UTMOS</th>
-            <th class="px-4 py-3 text-center font-semibold">WER</th>
-            <th class="px-4 py-3 text-center font-semibold">Tone</th>
-            <th class="px-4 py-3 text-center font-semibold">Total Reward</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 text-center text-gray-600">
-          <tr class="hover:bg-gray-50"><td class="py-2 font-medium text-gray-800">400</td><td>0.4695</td><td>0.4302</td><td>0.0845</td><td>0.7728</td><td class="font-semibold text-indigo-600">0.1466</td></tr>
-          <tr class="hover:bg-gray-50"><td class="py-2 font-medium text-gray-800">800</td><td>0.4627</td><td>0.3965</td><td>0.1099</td><td>0.7295</td><td class="font-semibold text-indigo-600">0.0968</td></tr>
-          <tr class="hover:bg-gray-50"><td class="py-2 font-medium text-gray-800">1200</td><td>0.4734</td><td>0.5009</td><td>0.1093</td><td>0.8409</td><td class="font-semibold text-indigo-600">0.2092</td></tr>
-          <tr class="hover:bg-gray-50"><td class="py-2 font-medium text-gray-800">1600</td><td>0.4587</td><td>0.4259</td><td>0.1003</td><td>0.8030</td><td class="font-semibold text-indigo-600">0.1365</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Training curve images -->
-    <div class="grid sm:grid-cols-2 gap-4">
-      <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-        <h3 class="font-semibold text-gray-700 text-sm mb-2">Reward Metrics Trend</h3>
-        <img src="assets/plots/metrics_trend.png" alt="Metrics trend" class="w-full rounded-lg" />
+    <div class="audio-row">
+      <div class="audio-col">
+        <div class="model-label">Baseline SparkTTS</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL/sample_01.wav" type="audio/wav" />
+        </audio>
       </div>
-      <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-        <h3 class="font-semibold text-gray-700 text-sm mb-2">Training Progress (smoothed)</h3>
-        <img src="assets/plots/training_progress_2800_smoothed.png" alt="Training progress smoothed" class="w-full rounded-lg" />
+      <div class="audio-col ours-col">
+        <div class="model-label">GSPO-2800 (Ours)</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL_2800/sample_01.wav" type="audio/wav" />
+        </audio>
       </div>
     </div>
-    <div class="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-100">
-      <h3 class="font-semibold text-gray-700 text-sm mb-2">Training Progress — Full View</h3>
-      <img src="assets/plots/training_progress_2800.png" alt="Training progress full" class="w-full rounded-lg" />
-    </div>
   </div>
-</section>
 
-<!-- ───────────── DEMO ───────────── -->
-<section id="demo" class="py-16 px-4 bg-gray-50">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Audio Demo</h2>
-    <p class="text-gray-500 mb-2 text-sm">
-      6 test samples — same text, same reference speaker prompt, different model weights.
+  <!-- Sample 3 -->
+  <div class="sample-block">
+    <p class="sample-text">
+      <strong>Sample 3.</strong>
+      &ldquo;Lục vân tiên quê ở huyện đông thành khôi ngô tuấn tú tài kiêm văn võ.
+      Nghe tin triều đình mở khoa thi vân tiên từ giã thầy xuống núi đua tài.&rdquo;
     </p>
-    <p class="text-xs text-gray-400 mb-8">
-      Reference speaker voice was used as a prompt for both models. GSPO was fine-tuned from the same SparkTTS backbone.
+    <div class="audio-row">
+      <div class="audio-col">
+        <div class="model-label">Baseline SparkTTS</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL/sample_02.wav" type="audio/wav" />
+        </audio>
+      </div>
+      <div class="audio-col ours-col">
+        <div class="model-label">GSPO-2800 (Ours)</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL_2800/sample_02.wav" type="audio/wav" />
+        </audio>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sample 4 -->
+  <div class="sample-block">
+    <p class="sample-text">
+      <strong>Sample 4.</strong>
+      &ldquo;Dự án mới về AI Marketing được triển khai nhanh trên nền tảng tiktok
+      để tối ưu hóa phễu chuyển đổi.&rdquo;
     </p>
-
-    <div class="space-y-5">
-
-      <!-- Sample 00 -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sample 1</span>
-          <p class="text-sm text-gray-700 mt-1 italic">"Anh chị ở bình dương, sau bốn năm làm overtime anh ấy tậu con xe Honda Civic"</p>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          <div class="px-5 py-4">
-            <div class="audio-label text-gray-400 mb-2">Baseline SparkTTS</div>
-            <audio controls><source src="assets/audio/visparkRL/sample_00.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-          <div class="px-5 py-4 bg-indigo-50/30">
-            <div class="audio-label text-indigo-500 mb-2">GSPO-2800 (ours)</div>
-            <audio controls><source src="assets/audio/visparkRL_2800/sample_00.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-        </div>
+    <div class="audio-row">
+      <div class="audio-col">
+        <div class="model-label">Baseline SparkTTS</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL/sample_03.wav" type="audio/wav" />
+        </audio>
       </div>
-
-      <!-- Sample 01 -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sample 2</span>
-          <p class="text-sm text-gray-700 mt-1 italic">"Em gái học ở sài gòn, chỉ cần một năm làm part-time là em sắm laptop gaming xịn sò"</p>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          <div class="px-5 py-4">
-            <div class="audio-label text-gray-400 mb-2">Baseline SparkTTS</div>
-            <audio controls><source src="assets/audio/visparkRL/sample_01.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-          <div class="px-5 py-4 bg-indigo-50/30">
-            <div class="audio-label text-indigo-500 mb-2">GSPO-2800 (ours)</div>
-            <audio controls><source src="assets/audio/visparkRL_2800/sample_01.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-        </div>
+      <div class="audio-col ours-col">
+        <div class="model-label">GSPO-2800 (Ours)</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL_2800/sample_03.wav" type="audio/wav" />
+        </audio>
       </div>
-
-      <!-- Sample 02 -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sample 3</span>
-          <p class="text-sm text-gray-700 mt-1 italic">"Lục vân tiên quê ở huyện đông thành khôi ngô tuấn tú tài kiêm văn võ. Nghe tin triều đình mở khoa thi vân tiên từ giã thầy xuống núi đua tài."</p>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          <div class="px-5 py-4">
-            <div class="audio-label text-gray-400 mb-2">Baseline SparkTTS</div>
-            <audio controls><source src="assets/audio/visparkRL/sample_02.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-          <div class="px-5 py-4 bg-indigo-50/30">
-            <div class="audio-label text-indigo-500 mb-2">GSPO-2800 (ours)</div>
-            <audio controls><source src="assets/audio/visparkRL_2800/sample_02.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sample 03 -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sample 4</span>
-          <p class="text-sm text-gray-700 mt-1 italic">"Dự án mới về AI Marketing được triển khai nhanh trên nền tảng tiktok để tối ưu hóa phễu chuyển đổi."</p>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          <div class="px-5 py-4">
-            <div class="audio-label text-gray-400 mb-2">Baseline SparkTTS</div>
-            <audio controls><source src="assets/audio/visparkRL/sample_03.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-          <div class="px-5 py-4 bg-indigo-50/30">
-            <div class="audio-label text-indigo-500 mb-2">GSPO-2800 (ours)</div>
-            <audio controls><source src="assets/audio/visparkRL_2800/sample_03.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sample 04 -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sample 5</span>
-          <p class="text-sm text-gray-700 mt-1 italic">"À thì... thực ra mình cũng chưa chuẩn bị kỹ lắm, nhưng mà thôi, cứ thử xem sao nhỉ"</p>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          <div class="px-5 py-4">
-            <div class="audio-label text-gray-400 mb-2">Baseline SparkTTS</div>
-            <audio controls><source src="assets/audio/visparkRL/sample_04.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-          <div class="px-5 py-4 bg-indigo-50/30">
-            <div class="audio-label text-indigo-500 mb-2">GSPO-2800 (ours)</div>
-            <audio controls><source src="assets/audio/visparkRL_2800/sample_04.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sample 05 -->
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="bg-gray-50 px-5 py-3 border-b border-gray-100">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sample 6</span>
-          <p class="text-sm text-gray-700 mt-1 italic">"Nắng chiều buông xuống nhuộm vàng cả cánh đồng lúa đang thì con gái gió thoảng qua mang theo hương vị nồng nàn của đất và vị ngọt của cỏ dại ven đường."</p>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          <div class="px-5 py-4">
-            <div class="audio-label text-gray-400 mb-2">Baseline SparkTTS</div>
-            <audio controls><source src="assets/audio/visparkRL/sample_05.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-          <div class="px-5 py-4 bg-indigo-50/30">
-            <div class="audio-label text-indigo-500 mb-2">GSPO-2800 (ours)</div>
-            <audio controls><source src="assets/audio/visparkRL_2800/sample_05.wav" type="audio/wav" />Your browser does not support audio.</audio>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
-</section>
 
-<!-- ───────────── CODE ───────────── -->
-<section id="code" class="py-16 px-4 bg-white">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Code &amp; Setup</h2>
-    <p class="text-gray-500 mb-8 text-sm">Reproduce the training pipeline</p>
-
-    <div class="grid sm:grid-cols-2 gap-6 mb-8">
-      <div>
-        <h3 class="font-semibold text-gray-700 mb-3 text-sm">Key Hyperparameters</h3>
-        <table class="w-full text-xs border-collapse">
-          <tbody class="divide-y divide-gray-100">
-            <tr><td class="py-1.5 pr-4 text-gray-500">Learning rate</td><td class="font-mono font-medium">1.0e-6</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Batch size</td><td class="font-mono font-medium">2 (grad accum ×4)</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Num generations (N)</td><td class="font-mono font-medium">4</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">LoRA rank / alpha</td><td class="font-mono font-medium">r=16 / α=32</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">LoRA dropout</td><td class="font-mono font-medium">0.05</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Temperature</td><td class="font-mono font-medium">0.8</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Top-p</td><td class="font-mono font-medium">0.95</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Max epochs</td><td class="font-mono font-medium">3</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Precision</td><td class="font-mono font-medium">BFloat16</td></tr>
-            <tr><td class="py-1.5 pr-4 text-gray-500">Training data</td><td class="font-mono font-medium">PhoAudiobook (5K)</td></tr>
-          </tbody>
-        </table>
+  <!-- Sample 5 -->
+  <div class="sample-block">
+    <p class="sample-text">
+      <strong>Sample 5.</strong>
+      &ldquo;À thì... thực ra mình cũng chưa chuẩn bị kỹ lắm,
+      nhưng mà thôi, cứ thử xem sao nhỉ&rdquo;
+    </p>
+    <div class="audio-row">
+      <div class="audio-col">
+        <div class="model-label">Baseline SparkTTS</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL/sample_04.wav" type="audio/wav" />
+        </audio>
       </div>
-      <div>
-        <h3 class="font-semibold text-gray-700 mb-3 text-sm">Dependencies</h3>
-        <div class="text-xs text-gray-600 space-y-1 font-mono bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <div>torch · torchaudio</div>
-          <div>transformers · peft</div>
-          <div>trl (GSPO trainer)</div>
-          <div>accelerate</div>
-          <div>speechbrain (SIM)</div>
-          <div>utmos22 (UTMOS)</div>
-          <div>openai-whisper (WER)</div>
-          <div>soundfile · librosa</div>
-        </div>
+      <div class="audio-col ours-col">
+        <div class="model-label">GSPO-2800 (Ours)</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL_2800/sample_04.wav" type="audio/wav" />
+        </audio>
       </div>
-    </div>
-
-    <h3 class="font-semibold text-gray-700 mb-3 text-sm">Reproduce Training</h3>
-    <div class="bg-gray-900 rounded-xl overflow-hidden shadow-sm">
-      <div class="flex items-center gap-2 px-4 py-2 bg-gray-800 border-b border-gray-700">
-        <div class="w-3 h-3 rounded-full bg-red-500"></div>
-        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-        <div class="w-3 h-3 rounded-full bg-green-500"></div>
-        <span class="text-xs text-gray-400 ml-2 font-mono">bash</span>
-      </div>
-      <pre class="text-green-300 text-xs p-5 overflow-x-auto leading-relaxed"><code><span class="text-gray-500"># 1. Install dependencies</span>
-pip install -r requirements.txt
-
-<span class="text-gray-500"># 2. Baseline evaluation (100 samples)</span>
-python scripts/run_baseline.py
-
-<span class="text-gray-500"># 3. Prepare TRL-format dataset</span>
-python scripts/prepare_data.py
-
-<span class="text-gray-500"># 4. Train GSPO (2× GPU)</span>
-accelerate launch \
-    --config_file configs/accelerate_config.yaml \
-    scripts/train_gspo_sparktts.py \
-    --config configs/config.yaml
-
-<span class="text-gray-500"># 5. Evaluate checkpoint</span>
-python scripts/eval_gspo_ckpt.py \
-    --checkpoint outputs/gspo_run_2000_steps/
-
-<span class="text-gray-500"># 6. Plot training rewards</span>
-python scripts/plot_rewards.py \
-    --log logs/gspo_rewards.csv</code></pre>
     </div>
   </div>
-</section>
 
-<!-- ───────────── CITATION ───────────── -->
-<section id="citation" class="py-16 px-4 bg-gray-50">
-  <div class="max-w-4xl mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Citation</h2>
-    <p class="text-gray-500 mb-6 text-sm">If you use this work, please cite:</p>
-    <div class="bg-gray-900 rounded-xl overflow-hidden shadow-sm">
-      <div class="flex items-center gap-2 px-4 py-2 bg-gray-800 border-b border-gray-700">
-        <span class="text-xs text-gray-400 font-mono">BibTeX</span>
+  <!-- Sample 6 -->
+  <div class="sample-block">
+    <p class="sample-text">
+      <strong>Sample 6.</strong>
+      &ldquo;Nắng chiều buông xuống nhuộm vàng cả cánh đồng lúa đang thì con gái
+      gió thoảng qua mang theo hương vị nồng nàn của đất và vị ngọt của cỏ dại ven đường.&rdquo;
+    </p>
+    <div class="audio-row">
+      <div class="audio-col">
+        <div class="model-label">Baseline SparkTTS</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL/sample_05.wav" type="audio/wav" />
+        </audio>
       </div>
-      <pre class="text-yellow-200 text-xs p-5 overflow-x-auto leading-relaxed"><code>@misc{gspo_sparktts_2025,
-  title     = {GSPO for Vietnamese TTS Fine-tuning},
-  author    = {Nguyen, ...},
-  year      = {2025},
-  note      = {Fine-tuning Vi-SparkTTS-0.5B with Group Relative Policy Optimization},
-  url       = {https://github.com/...}
-}</code></pre>
-    </div>
-
-    <div class="mt-8">
-      <h3 class="font-semibold text-gray-700 mb-3 text-sm">Acknowledgements</h3>
-      <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
-        <li><strong>Vi-SparkTTS</strong> — Base Vietnamese TTS model</li>
-        <li><strong>TRL (HuggingFace)</strong> — GSPO trainer implementation</li>
-        <li><strong>UTMOS22</strong> — Predicted MOS evaluation</li>
-        <li><strong>PhoAudiobook</strong> — Vietnamese audiobook training data</li>
-        <li><strong>Whisper Large V3</strong> — ASR-based WER evaluation</li>
-        <li><strong>WavLM + ECAPA-TDNN</strong> — Speaker similarity scoring</li>
-      </ul>
+      <div class="audio-col ours-col">
+        <div class="model-label">GSPO-2800 (Ours)</div>
+        <audio controls>
+          <source src="assets/audio/visparkRL_2800/sample_05.wav" type="audio/wav" />
+        </audio>
+      </div>
     </div>
   </div>
-</section>
 
-<!-- ───────────── FOOTER ───────────── -->
-<footer class="bg-gray-900 text-gray-400 text-xs py-6 px-4 text-center">
-  <p>GSPO SparkTTS · Vietnamese TTS Research · 2025</p>
-</footer>
+  <!-- ─── 5. CITATION ─── -->
+  <h2>5. Citation</h2>
+  <div class="bibtex">@misc{gspo_sparktts_2025,<br>
+&nbsp;&nbsp;title&nbsp;&nbsp;&nbsp;&nbsp; = {GSPO for Vietnamese Text-to-Speech Fine-tuning},<br>
+&nbsp;&nbsp;author&nbsp;&nbsp;&nbsp; = {Dinh, Xuan Binh and Nguyen, Duc Anh},<br>
+&nbsp;&nbsp;year&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = {2025},<br>
+&nbsp;&nbsp;url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = {https://github.com/Dinhxuanbinh/gspo_sparktts}<br>
+}</div>
 
+  <!-- ─── ACKNOWLEDGEMENTS ─── -->
+  <h2>Acknowledgements</h2>
+  <p style="font-size:0.92em; color:#555;">
+    We thank the authors of
+    <a href="https://github.com/SparkAudio/SparkTTS">Vi-SparkTTS</a>,
+    <a href="https://github.com/huggingface/trl">TRL (HuggingFace)</a>,
+    <a href="https://github.com/tarepan/SpeechMOS">UTMOS22</a>, and
+    <a href="https://github.com/openai/whisper">Whisper</a>
+    for their open-source contributions.
+    Training data sourced from PhoAudiobook.
+  </p>
+
+  <footer>
+    GSPO SparkTTS · Vietnamese Speech Research · 2025
+  </footer>
+
+</div>
 </body>
 </html>
